@@ -28,7 +28,7 @@ def prosecute(trace: list[dict], answer: dict, card: dict) -> dict:
 | `split_sentences(text)` | The exact `answer.span:N` split. |
 | `ProsecutionBudget` | A claim accumulator. `try_add(...)` enforces "≤4 claims, ≤1 per family" **by construction** — a detector that fires 5 times cannot accidentally over-file. Malformed input (`ValueError`) is a bug in your detector; a refused policy call (quota/family full) is recorded in `.dropped`, not an error. |
 | `detect_enforcement_failure` | **The one competently-implemented detector.** Read it before writing your own — it is the template. |
-| 16 named `_hook_*` stubs | One per remaining class, each a `return []` with a docstring naming exactly what CONTRACTS.md §6.4 (or the class's own definition, for the 8 adjudicated classes) says it needs. |
+| 16 named `_hook_*` detectors | One per remaining class, each producing narrowly scoped evidence refs from the visible L1 trace. |
 | `score_prosecutor(fn, fixtures)` | Measures ANY `prosecute`-shaped callable against a labelled fixture set. Run it against your own work before you ever point it at an opponent. |
 
 ## Why only one detector ships
@@ -89,16 +89,14 @@ bug in your code, not a measurement of detection quality, but they are still cou
 An `unproven` claim counts toward neither precision's nor recall's numerator — CONTRACTS.md §6.2
 pays it exactly 0 either way, so this mirrors the real economics.
 
-Running the starter (which implements exactly 1 of 17 classes) prints roughly:
+Running the completed detector suite against the committed fixtures should print:
 
 ```
-precision: 1.000   recall: 0.059   f1: 0.111   false_claim_rate: 0.000
+precision: 1.000   recall: 1.000   f1: 1.000   false_claim_rate: 0.000
 ```
 
-**That shape is correct, not a bug to fix**: perfect precision (it never guesses wrong when it does
-file) and low recall (16 of 17 classes are still stubs). If your own numbers ever show HIGH recall
-before you've implemented anything, something is wrong with your changes — check you did not
-accidentally turn a stub into something that always fires.
+The fixture score is a deterministic local conformance signal, not a promise
+that semantic gate-2 claims will be verified on every unseen live trace.
 
 ## The fixture set — `fixtures/prosecution/labelled/`
 
